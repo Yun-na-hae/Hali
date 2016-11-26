@@ -1,3 +1,4 @@
-*.VC
-ipch/
-debug/
+HalliGalli/*.VC
+HaliiGalli/*.VC.db
+HalliGalli/ipch/
+HalliGallidebug/

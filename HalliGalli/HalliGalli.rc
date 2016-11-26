@@ -203,10 +203,10 @@ BEGIN
     PUSHBUTTON      "BELL RING",IDC_CLICK,136,113,50,14
     PUSHBUTTON      "PRESS",IDC_P1PRESS,157,171,50,14
     CONTROL         "",IDC_BELL,"Static",SS_BITMAP,141,71,38,40
-    LTEXT           "Static",IDC_P1NAME,283,124,19,8
-    LTEXT           "Static",IDC_P2NAME,16,65,19,8
-    LTEXT           "Static",IDC_P2CARDS,115,15,58,14
-    LTEXT           "Static",IDC_P1CARDS,149,159,57,8
+    LTEXT           "Static",IDC_P1NAME,285,111,19,8
+    LTEXT           "Static",IDC_P2NAME,13,60,19,8
+    LTEXT           "Static",IDC_P2CARDS,13,76,58,14
+    LTEXT           "Static",IDC_P1CARDS,233,123,57,8
     LTEXT           "Static",IDC_CARDS,136,58,55,8
 END
 
