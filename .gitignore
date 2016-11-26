@@ -1,1 +1,3 @@
 *.VC
+ipch/
+debug/
