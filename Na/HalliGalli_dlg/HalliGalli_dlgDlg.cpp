@@ -12,6 +12,8 @@
 #include <mmsystem.h>
 #include "SpacebarDlg.h"
 
+
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -56,6 +58,7 @@ END_MESSAGE_MAP()
 
 CHalliGalli_dlgDlg::CHalliGalli_dlgDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_HALLIGALLI_DLG_DIALOG, pParent)
+	, sound(TRUE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -85,6 +88,12 @@ BEGIN_MESSAGE_MAP(CHalliGalli_dlgDlg, CDialogEx)
 	ON_UPDATE_COMMAND_UI(ID_MIDDLE, &CHalliGalli_dlgDlg::OnUpdateMiddle)
 	ON_COMMAND(ID_LOW, &CHalliGalli_dlgDlg::OnLow)
 	ON_UPDATE_COMMAND_UI(ID_LOW, &CHalliGalli_dlgDlg::OnUpdateLow)
+	ON_COMMAND(ID_START_COM, &CHalliGalli_dlgDlg::OnStartCom)
+	ON_COMMAND(ID_STOP, &CHalliGalli_dlgDlg::OnStop)
+	ON_COMMAND(ID_END, &CHalliGalli_dlgDlg::OnEnd)
+	ON_COMMAND(ID_HELP, &CHalliGalli_dlgDlg::OnHelp)
+	ON_COMMAND(ID_SOUND, &CHalliGalli_dlgDlg::OnSound)
+	ON_UPDATE_COMMAND_UI(ID_SOUND, &CHalliGalli_dlgDlg::OnUpdateSound)
 END_MESSAGE_MAP()
 
 
@@ -94,12 +103,9 @@ BOOL CHalliGalli_dlgDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	m_gamedata.Game_ready();
-	str_num.Format(_T("%d"), m_gamedata.All_cards.card_size());
-	m_all_re.SetWindowText(str_num);
-	str_num.Format(_T("%d"), m_gamedata.P1_cards.card_size());
-	m_p1_re.SetWindowText(str_num);
-	str_num.Format(_T("%d"), m_gamedata.P2_cards.card_size());
-	m_p2_re.SetWindowText(str_num);
+
+	show();
+	
 	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
 
 	// IDM_ABOUTBOX는 시스템 명령 범위에 있어야 합니다.
@@ -191,7 +197,8 @@ void CHalliGalli_dlgDlg::OnBnClickedButtonBellring()
 	{
 		// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 		if (m_level == 0 || m_level == 1) {
-			PlaySound(_T("./res/bell.wav"), NULL, SND_ASYNC);
+			if(sound == TRUE)
+				PlaySound(_T("./res/bell.wav"), NULL, SND_ASYNC);
 			CArrow dlg;
 
 
@@ -208,8 +215,8 @@ void CHalliGalli_dlgDlg::OnBnClickedButtonBellring()
 		else if (m_level == 2) {
 			
 			SpacebarDlg Spacedlg;
-
-			PlaySound(_T("./res/bell.wav"), NULL, SND_ASYNC);
+			if(sound == TRUE)
+				PlaySound(_T("./res/bell.wav"), NULL, SND_ASYNC);
 
 
 			if (Spacedlg.DoModal() == IDOK)
@@ -222,7 +229,9 @@ void CHalliGalli_dlgDlg::OnBnClickedButtonBellring()
 				AfxMessageBox(_T("실패\nPlayer2 takes cards"));
 				success = FALSE;
 			}
-		
+
+			Success(success);
+
 		}
 	}
 	else
@@ -275,46 +284,15 @@ void CHalliGalli_dlgDlg::OnBnClickedButtonPress()
 	p2c_image.Load(strP2CardPath);
 	p2c_image.StretchBlt(dc.m_hDC, 425, 230, 150, 200, SRCCOPY);
 
-	str_num.Format(_T("%d"), m_gamedata.All_cards.card_size());
-	m_all_re.SetWindowText(str_num);
-	str_num.Format(_T("%d"), m_gamedata.P1_cards.card_size());
-	m_p1_re.SetWindowText(str_num);
-	str_num.Format(_T("%d"), m_gamedata.P2_cards.card_size());
-	m_p2_re.SetWindowText(str_num);
+	show();
+
 
 	if (m_gamedata.Compare(p1c, p2c)){
 		bell_ring = TRUE;
 		CButton* pBtn = (CButton*)GetDlgItem(IDC_BUTTON_PRESS);
 		pBtn->EnableWindow(FALSE);
 		SetTimer(2000, 1500, NULL);
-		if (success == TRUE) {
-			while(m_gamedata.All_cards.card_size())
-			{
-				m_gamedata.P1_cards.push_card(m_gamedata.All_cards.get(0));
-				m_gamedata.All_cards.pop_card();
-				str_num.Format(_T("%d"), m_gamedata.All_cards.card_size());
-				m_all_re.SetWindowText(str_num);
-				str_num.Format(_T("%d"), m_gamedata.P1_cards.card_size());
-				m_p1_re.SetWindowText(str_num);
-				str_num.Format(_T("%d"), m_gamedata.P2_cards.card_size());
-				m_p2_re.SetWindowText(str_num);
-			}
-		}
-		else if (success == FALSE)
-		{
-			while (m_gamedata.All_cards.card_size())
-			{
-				m_gamedata.P2_cards.push_card(m_gamedata.All_cards.get(0));
-				m_gamedata.All_cards.pop_card();
-				str_num.Format(_T("%d"), m_gamedata.All_cards.card_size());
-				m_all_re.SetWindowText(str_num);
-				str_num.Format(_T("%d"), m_gamedata.P1_cards.card_size());
-				m_p1_re.SetWindowText(str_num);
-				str_num.Format(_T("%d"), m_gamedata.P2_cards.card_size());
-				m_p2_re.SetWindowText(str_num);
-			}
-		}
-
+		
 	}
 	else
 	{
@@ -344,23 +322,21 @@ void CHalliGalli_dlgDlg::OnTimer(UINT_PTR nIDEvent)
 			{
 				m_gamedata.P2_cards.push_card(m_gamedata.All_cards.get(0));
 				m_gamedata.All_cards.pop_card();
-				str_num.Format(_T("%d"), m_gamedata.All_cards.card_size());
-				m_all_re.SetWindowText(str_num);
-				str_num.Format(_T("%d"), m_gamedata.P1_cards.card_size());
-				m_p1_re.SetWindowText(str_num);
-				str_num.Format(_T("%d"), m_gamedata.P2_cards.card_size());
-				m_p2_re.SetWindowText(str_num);
+
+				show();
+
 			}
 			bell_ring = FALSE;
 
-		}
-		if (m_gamedata.P1_cards.card_size() == 0 || m_gamedata.P2_cards.card_size() == 0)
-		{
-			if (m_gamedata.P1_cards.card_size() == 0)
-				AfxMessageBox(_T("Player2 wins!!"));
-			else if (m_gamedata.P2_cards.card_size() == 0)
-				AfxMessageBox(_T("Player1 wins!!"));
-			return;
+			if (m_gamedata.P1_cards.card_size() == 0 || m_gamedata.P2_cards.card_size() == 0)
+			{
+				if (m_gamedata.P1_cards.card_size() == 0)
+					AfxMessageBox(_T("Player2 wins!!"));
+				else if (m_gamedata.P2_cards.card_size() == 0)
+					AfxMessageBox(_T("Player1 wins!!"));
+				return;
+			}
+
 		}
 	}
 	CDialogEx::OnTimer(nIDEvent);
@@ -451,4 +427,181 @@ BOOL CHalliGalli_dlgDlg::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CHalliGalli_dlgDlg::OnStartCom()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	while (m_gamedata.P1_cards.card_size())
+	{
+		m_gamedata.All_cards.push_card(m_gamedata.P1_cards.get(0));
+		m_gamedata.P1_cards.pop_card();
+	}
+
+	while (m_gamedata.P2_cards.card_size())
+	{
+		m_gamedata.All_cards.push_card(m_gamedata.P2_cards.get(0));
+		m_gamedata.P2_cards.pop_card();
+	}
+
+
+	m_gamedata.All_cards.shuffle(0, 55);
+
+	//Player 1과 Player 2에게 28장씩 분배
+	for (int i = 0; i < 28; i++)
+	{
+		m_gamedata.P1_cards.push_card(m_gamedata.All_cards.get(0));
+		m_gamedata.All_cards.pop_card();
+		m_gamedata.P2_cards.push_card(m_gamedata.All_cards.get(0));
+		m_gamedata.All_cards.pop_card();
+	}
+
+
+	show();	
+	
+}
+
+
+void CHalliGalli_dlgDlg::OnStop()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	CDialog dig(IDD_DIALOG1);
+
+	if (dig.DoModal() == IDOK)
+		return;
+	else if (dig.DoModal() == IDCANCEL)
+	{
+		while (m_gamedata.P1_cards.card_size())
+		{
+			m_gamedata.All_cards.push_card(m_gamedata.P1_cards.get(0));
+			m_gamedata.P1_cards.pop_card();
+		}
+
+		while (m_gamedata.P2_cards.card_size())
+		{
+			m_gamedata.All_cards.push_card(m_gamedata.P2_cards.get(0));
+			m_gamedata.P2_cards.pop_card();
+		}
+
+
+		m_gamedata.All_cards.shuffle(0, 55);
+
+		//Player 1과 Player 2에게 28장씩 분배
+		for (int i = 0; i < 28; i++)
+		{
+			m_gamedata.P1_cards.push_card(m_gamedata.All_cards.get(0));
+			m_gamedata.All_cards.pop_card();
+			m_gamedata.P2_cards.push_card(m_gamedata.All_cards.get(0));
+			m_gamedata.All_cards.pop_card();
+		}
+
+
+		show();	
+
+		return;
+	}
+}
+
+
+void CHalliGalli_dlgDlg::OnEnd()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	EndDialog(IDD_HALLIGALLI_DLG_DIALOG);
+}
+
+
+void CHalliGalli_dlgDlg::OnHelp()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	CDialog dig(IDD_HELP);
+
+	dig.DoModal();
+
+}
+
+
+void CHalliGalli_dlgDlg::show()
+{
+	str_num.Format(_T("%d"), m_gamedata.All_cards.card_size());
+	m_all_re.SetWindowText(str_num);
+	str_num.Format(_T("%d"), m_gamedata.P1_cards.card_size());
+	m_p1_re.SetWindowText(str_num);
+	str_num.Format(_T("%d"), m_gamedata.P2_cards.card_size());
+	m_p2_re.SetWindowText(str_num);
+
+	CImage p1c_re_image, p2c_re_image;
+
+	CString strP1CardREPath, strP2CardREPath, tmp;
+
+	tmp.Format(_T("./res/p1_%d.png"), m_gamedata.P1_cards.card_size());
+	strP1CardREPath = tmp.MakeLower();
+
+	tmp.Format(_T("./res/p2_%d.png"), m_gamedata.P2_cards.card_size());
+	strP2CardREPath = tmp.MakeLower();
+
+	CClientDC dc(this);
+	p1c_re_image.Load(strP1CardREPath);
+	p1c_re_image.StretchBlt(dc.m_hDC, 800,550, 450, 150, SRCCOPY);
+
+	p2c_re_image.Load(strP2CardREPath);
+	p2c_re_image.StretchBlt(dc.m_hDC, 20, 40, 450, 150, SRCCOPY);
+}
+
+
+void CHalliGalli_dlgDlg::Success(bool success)
+{
+
+	if (success == TRUE) {
+		while (m_gamedata.All_cards.card_size())
+		{
+			m_gamedata.P1_cards.push_card(m_gamedata.All_cards.get(0));
+			m_gamedata.All_cards.pop_card();
+			show();
+
+		}
+	}
+	else if (success == FALSE)
+	{
+		while (m_gamedata.All_cards.card_size())
+		{
+			m_gamedata.P2_cards.push_card(m_gamedata.All_cards.get(0));
+			m_gamedata.All_cards.pop_card();
+			show();
+		}
+	}
+
+	if (m_gamedata.P1_cards.card_size() == 0 || m_gamedata.P2_cards.card_size() == 0)
+	{
+		if (m_gamedata.P1_cards.card_size() == 0)
+			AfxMessageBox(_T("Player2 wins!!"));
+		else if (m_gamedata.P2_cards.card_size() == 0)
+			AfxMessageBox(_T("Player1 wins!!"));
+		return;
+	}
+}
+
+
+void CHalliGalli_dlgDlg::OnSound()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	if (sound == TRUE)
+		sound = FALSE;
+	else
+		sound = TRUE;
+}
+
+
+void CHalliGalli_dlgDlg::OnUpdateSound(CCmdUI *pCmdUI)
+{
+	// TODO: 여기에 명령 업데이트 UI 처리기 코드를 추가합니다.
+	CMenu *hMenu = GetMenu();
+
+	if (hMenu->GetMenuState(ID_SOUND, MF_BYCOMMAND) != MF_CHECKED) {
+		hMenu->CheckMenuItem(ID_SOUND, MF_CHECKED);
+
+	}
+	else {
+		hMenu->CheckMenuItem(ID_SOUND, MF_UNCHECKED);
+	}
 }

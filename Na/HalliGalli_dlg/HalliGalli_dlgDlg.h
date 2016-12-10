@@ -28,6 +28,7 @@ public:
 	bool success;
 	bool time;
 	CString str_num;
+	bool sound;
 
 // 구현입니다.
 protected:
@@ -54,4 +55,12 @@ public:
 	afx_msg void OnLow();
 	afx_msg void OnUpdateLow(CCmdUI *pCmdUI);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnStartCom();
+	afx_msg void OnStop();
+	afx_msg void OnEnd();
+	afx_msg void OnHelp();
+	void show();
+	void Success(bool success);
+	afx_msg void OnSound();
+	afx_msg void OnUpdateSound(CCmdUI *pCmdUI);
 };

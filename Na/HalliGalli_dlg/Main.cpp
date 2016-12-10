@@ -55,7 +55,6 @@ void Main::Game_ready()
 			All_cards.push_card(card);
 		}
 
-	int advasfa = 234;
 	//모든 카드 섞기
 	All_cards.shuffle(0, 55);
 
