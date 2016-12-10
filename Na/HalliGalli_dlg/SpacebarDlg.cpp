@@ -89,7 +89,7 @@ BOOL SpacebarDlg::OnInitDialog()
 	m_ProCtrl.SetRange(0, 100);
 	m_ProCtrl.SetPos(100);
 	m_ProCtrl.SetStep(-2);
-	SetTimer(1000, 100, NULL);//40밀리세컨드마다 온타임 함수 실행
+	SetTimer(1000, 25, NULL);//40밀리세컨드마다 온타임 함수 실행
 
 	Str.Format(_T("%d"), m_spacebarcnt);
 	m_num.SetWindowText(Str);
